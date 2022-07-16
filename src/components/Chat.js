@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
@@ -60,15 +60,29 @@ const initialBots = [
 const Chat = () => {
   const [bots, setBots] = useState(initialBots);
   const [search, setSearch] = useState("");
-  const [selectedBot, setSelectedBot] = useState(bots[0].id);
+  const [selectedBot, setSelectedBot] = useState(initialBots[0].id);
   const [message, setMessage] = useState("");
   const classes = useStyles();
+  const botRef = useRef(null);
+  botRef.current = selectedBot;
 
   const handleOnchange = (event) => {
     setSearch(event.target.value);
   };
 
   const handleSelectBot = (botid) => {
+    setTimeout(() => {
+      const bot = bots.find((bot) => bot.id === botid);
+      const newChat = bot.chat.map((chat) => ({
+        ...chat,
+        highlight: false,
+      }));
+      const newBot = { ...bot, chat: newChat };
+      setMessage("");
+
+      const newBots = bots.map((bot) => (bot.id === botid ? newBot : bot));
+      setBots(newBots);
+    }, 1000);
     setSelectedBot(botid);
   };
 
@@ -76,15 +90,23 @@ const Chat = () => {
     setMessage(event.target.value);
   };
 
-  const handleReply = (botid) => {
-    const newBots = bots.map((bot) => {
-      if (bot.id === botid) {
-        bot.chat.push({ text: "ASD", time: Date.now(), align: "left" });
-      }
-      return bot;
-    });
-    setBots(newBots);
-    setMessage("");
+  const handleReply = (botid, newBots) => {
+    setTimeout(() => {
+      const autoBots = newBots.map((bot) => {
+        if (bot.id === botid) {
+          bot.chat.push({
+            text: bot.replies[Math.floor(Math.random() * 3)],
+            time: Date.now(),
+            align: "left",
+            highlight: botRef.current === botid ? false : true,
+          });
+        }
+        console.log(bot.chat);
+        return bot;
+      });
+      setBots(autoBots);
+      setMessage("");
+    }, 3000);
   };
 
   const handleOnclick = (event) => {
@@ -93,11 +115,6 @@ const Chat = () => {
     const newChat = [
       ...bot.chat,
       { text: message, time: Date.now(), align: "right" },
-      {
-        text: bot.replies[Math.floor(Math.random() * 3)],
-        time: Date.now(),
-        align: "left",
-      },
     ];
     const newBot = { ...bot, chat: newChat };
     setMessage("");
@@ -105,6 +122,8 @@ const Chat = () => {
     const newBots = bots.map((bot) => (bot.id === selectedBot ? newBot : bot));
 
     setBots(newBots);
+
+    handleReply(bot.id, newBots);
   };
 
   return (
@@ -144,11 +163,13 @@ const Chat = () => {
             {bots.map((bot) => {
               return (
                 <ListItem
+                  style={{
+                    backgroundColor:
+                      bot.id === selectedBot ? "#e0e0e0" : "white",
+                  }}
                   button
                   key={bot.id}
-                  onClick={() => {
-                    handleSelectBot(bot.id);
-                  }}
+                  onClick={handleSelectBot.bind(this, bot.id)}
                 >
                   <ListItemIcon>
                     <Avatar alt={bot.name} src={bot.avatar} />
@@ -166,7 +187,12 @@ const Chat = () => {
               .find((bot) => bot.id === selectedBot)
               .chat.map((message) => {
                 return (
-                  <ListItem key="1">
+                  <ListItem
+                    key="1"
+                    style={{
+                      backgroundColor: message.highlight ? "#e0e0e0" : "white",
+                    }}
+                  >
                     <Grid container>
                       <Grid item xs={12}>
                         <ListItem key={message.time}>
@@ -208,15 +234,8 @@ const Chat = () => {
           </Grid>
         </Grid>
       </Grid>
-      <br /> <br />
-      <br />
-      <br /> <br />
-      <br />
-      <br /> <br />
-      <br />
-      <br /> <br />
-      <br />
-      <div style={{ maxWidth: "300px" }}></div>
+  
+      
     </div>
   );
 };

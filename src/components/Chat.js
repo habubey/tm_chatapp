@@ -13,7 +13,6 @@ import Avatar from "@material-ui/core/Avatar";
 import Fab from "@material-ui/core/Fab";
 import SendIcon from "@material-ui/icons/Send";
 
-
 const useStyles = makeStyles({
   table: {
     minWidth: 650,
@@ -62,16 +61,11 @@ const initialBots = [
 
 const Chat = () => {
   const [bots, setBots] = useState(initialBots);
-  const [search, setSearch] = useState("");
   const [selectedBot, setSelectedBot] = useState(initialBots[0].id);
   const [message, setMessage] = useState("");
   const classes = useStyles();
   const botRef = useRef(null);
   botRef.current = selectedBot;
-
-  const handleOnchange = (event) => {
-    setSearch(event.target.value);
-  };
 
   const handleSelectBot = (botid) => {
     setTimeout(() => {
@@ -140,7 +134,7 @@ const Chat = () => {
                 display: "flex",
                 justifyContent: "center",
                 fontSize: "3.5rem",
-                fontFamily:"Patua One"
+                fontFamily: "Patua One",
               }}
             >
               💬 TM Chat App 💬
